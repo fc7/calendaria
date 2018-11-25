@@ -1,0 +1,7 @@
+.vscode
+dist
+node_modules
+astro.js
+test*.js
+tmp*
+lib

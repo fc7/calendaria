@@ -1,0 +1,18 @@
+{
+  "defaultSeverity": "error",
+  "extends": ["tslint:recommended"],
+  "jsRules": {},
+  "rules": {
+    "indent": [true, "spaces", 4],
+    "semicolon": [true, "never"],
+    "linebreak-style": [true, "LF"],
+    "no-console": [false],
+    "max-classes-per-file": [false, 5],
+    "quotemark": false,
+    "interface-name": false,
+    "no-namespace": false,
+    "no-shadowed-variable": false,
+    "object-literal-sort-keys": false,
+  },
+  "rulesDirectory": []
+}
