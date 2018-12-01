@@ -10,27 +10,22 @@
  * @author François Charette, 2018
  * @license MIT
  */
-
-import astro from 'astronomia/lib/base'
-import deltat from 'astronomia/lib/deltat'
-import eqtime from 'astronomia/lib/eqtime'
-import moonphase from 'astronomia/lib/moonphase'
-// const julian from 'astronomia/lib/julian'
-// const Sunrise from 'astronomia/lib/sunrise'.Sunrise
-import moonposition from 'astronomia/lib/moonposition'
-import nutation from 'astronomia/lib/nutation'
-import sidereal from 'astronomia/lib/sidereal'
+import * as astro from 'astronomia/lib/base'
+import * as deltat from 'astronomia/lib/deltat'
+import * as eqtime from 'astronomia/lib/eqtime'
+import * as moonphase from 'astronomia/lib/moonphase'
+import * as moonposition from 'astronomia/lib/moonposition'
+import * as nutation from 'astronomia/lib/nutation'
+import * as sidereal from 'astronomia/lib/sidereal'
 /* Only necessary for using the high-precision functions solstice.march2, solstice.september2 and eqtime.e
     which take EARTH as second parameter */
 // const planetposition from 'astronomia/lib/planetposition'
 // const data from 'astronomia/data'
 // const EARTH = new planetposition.Planet(data.earth)
-import solar from 'astronomia/lib/solar'
-// const sexa from 'astronomia/lib/sexagesimal'
-import solstice from 'astronomia/lib/solstice'
-
-import coord from 'astronomia/lib/coord'
-import globe from 'astronomia/lib/globe'
+import * as solar from 'astronomia/lib/solar'
+import * as solstice from 'astronomia/lib/solstice'
+import * as coord from 'astronomia/lib/coord'
+import * as globe from 'astronomia/lib/globe'
 const π = Math.PI
 const D2R = π / 180 // to convert degrees to radians
 
@@ -52,6 +47,8 @@ export enum Weekday {
 }
 
 export namespace Calendars {
+
+    type DateArray = [number, number, number, number, number, number]
 
     /**
      * Adapted Modulo function to account for negative a or b
@@ -128,7 +125,7 @@ export namespace Calendars {
      * @param {*} month
      * @param {*} day
      */
-    export function toArray(year: number, month: number, day: number) {
+    export function toArray(year: number, month: number, day: number): DateArray {
         // console.log("formatting y-m-d as array: "+ year +"-"+ month +"-"+ day)
         let rday = Math.floor(day)
         if (rday === day) {
@@ -185,15 +182,15 @@ export namespace Calendars {
 
         export const EPOCH = 678576 // = JD.EPOCH - MODIFIED_JULIAN_ADJUSTMENT -> 1858-11-17
 
-        export function fromJD(jd) {
+        export function fromJD(jd: number): number {
             return jd - MODIFIED_JULIAN_ADJUSTMENT
         }
 
-        export function fromFixed(date) {
+        export function fromFixed(date: number): number {
             return date - EPOCH
         }
 
-        export function toFixed(mjd: number) {
+        export function toFixed(mjd: number): number {
             return mjd + EPOCH
         }
     }
@@ -218,7 +215,7 @@ export namespace Calendars {
          * Returns the Egyptian date for the given RD
          * @param {*} date
          */
-        export function fromFixed(date: number): number[] {
+        export function fromFixed(date: number): DateArray {
             const days = date - Egyptian.EPOCH
             const year = Math.floor(days / 365) + 1
             const month = Math.floor((_mod(days, 365)) / 30) + 1
@@ -244,7 +241,7 @@ export namespace Calendars {
          * Returns the Armenian date for the given RD
          * @param {*} date
          */
-        export function fromFixed(date: number): number[] {
+        export function fromFixed(date: number): DateArray {
             return Egyptian.fromFixed(date + Egyptian.EPOCH - EPOCH)
         }
     }
@@ -303,7 +300,7 @@ export namespace Calendars {
          * Returns the Gregorian date as an array for the given RD
          * @param {*} date
          */
-        export function fromFixed(date: number): number[] {
+        export function fromFixed(date: number): DateArray {
             const year = yearFromFixed(date)
             const priorDays = date - toFixed(year, 1, 1)
             let corr = 2
@@ -341,7 +338,7 @@ export namespace Calendars {
          * @param {*} month
          * @param {*} day
          */
-        export function toFixed(year, month, day) {
+        export function toFixed(year: number, month: number, day: number): number {
             const y = year < 0 ? year : year - 1 // "y" here corr. to "y-1" in R&D
             let c = -2
             if (month <= 2) {
@@ -356,7 +353,7 @@ export namespace Calendars {
          * Returns the Julian date as an array for the given RD
          * @param {*} date
          */
-        export function fromFixed(date: number): number[] {
+        export function fromFixed(date: number): DateArray {
             const approx = Math.floor((4 * (date - EPOCH) + 1464) / 1461)
             const year = approx > 0 ? approx : approx - 1
             const priorDays = date - toFixed(year, 1, 1)
@@ -378,7 +375,7 @@ export namespace Calendars {
          * Returns the RD of the Gregorian Easter for the given Gregorian year
          * @param {*} year
          */
-        export function Gregorian(year: number) {
+        export function Gregorian(year: number): number {
             const c = Math.floor(year / 100) + 1
             const shiftedEpact = _mod(14 + 11 * Math.floor(_mod(year, 19))
                 - Math.floor(3 * c / 4) + Math.floor((5 + 8 * c) / 25), 30)
@@ -393,7 +390,7 @@ export namespace Calendars {
          * Returns the RD of the Orthodox Easter for the given Gregorian year
          * @param {*} year
          */
-        export function Orthodox(year: number) {
+        export function Orthodox(year: number): number {
             const paschalMoon = 354 * year + 30 * Math.floor((7 * year + 8) / 19)
                 + Math.floor(year / 4) - Math.floor(year / 19) - 272
             return weekDayAfter(paschalMoon, Weekday.Sunday)
@@ -420,7 +417,7 @@ export namespace Calendars {
          * @param {*} month
          * @param {*} day
          */
-        export function toFixed(year, month, day) {
+        export function toFixed(year: number, month: number, day: number): number {
             return EPOCH - 1 + 365 * (year - 1) + Math.floor(year / 4) + 30 * (month - 1) + day
         }
 
@@ -428,7 +425,7 @@ export namespace Calendars {
          * Returns the Coptic date as an array for the given RD
          * @param {*} date
          */
-        export function fromFixed(date: number): number[] {
+        export function fromFixed(date: number): DateArray {
             const year = Math.floor((4 * (date - EPOCH) + 1463) / 1461)
             const month = Math.floor((date - toFixed(year, 1, 1)) / 30) + 1
             const day = date + 1 - toFixed(year, month, 1)
@@ -445,14 +442,14 @@ export namespace Calendars {
          * @param {*} month
          * @param {*} day
          */
-        export function toFixed(year, month, day) {
+        export function toFixed(year: number, month: number, day: number): number {
             return EPOCH + Coptic.toFixed(year, month, day) - Coptic.EPOCH
         }
         /**
          * Returns the Ethiopic date as an array for the given RD
          * @param {*} date
          */
-        export function fromFixed(date) {
+        export function fromFixed(date: number): DateArray {
             return Coptic.fromFixed(date + Coptic.EPOCH - EPOCH)
         }
     }
@@ -475,7 +472,7 @@ export namespace Calendars {
          * @param {*} month
          * @param {*} day
          */
-        export function toFixed(year, month, day) {
+        export function toFixed(year: number, month: number, day: number): number {
             return day + 29 * (month - 1) + Math.floor((6 * month - 1) / 11) +
                 354 * (year - 1) + Math.floor((3 + 11 * year) / 30) + EPOCH - 1
         }
@@ -484,7 +481,7 @@ export namespace Calendars {
          * Returns the Islamic date as an array for the given RD
          * @param {*} date
          */
-        export function fromFixed(date) {
+        export function fromFixed(date: number): DateArray {
             const year = Math.floor((30 * (date - EPOCH) + 10646) / 10631)
             const priorDays = date - Islamic.toFixed(year, 1, 1)
             const month = Math.floor((11 * priorDays + 330) / 325)
@@ -504,17 +501,17 @@ export namespace Calendars {
          * Whether the given Hebrew year is a leap year
          * @param {*} year
          */
-        export function isLeapYear(year) {
+        export function isLeapYear(year: number): boolean {
             return _mod(7 * year + 1, 19) < 7
         }
 
-        function molad(year, month) {
+        function molad(year: number, month: number): number {
             const y = (month < TISHRI) ? year + 1 : year
             const monthsElapsed = month - TISHRI + Math.floor((235 * y - 234) / 19)
             return EPOCH - 876 / 25920 + monthsElapsed * (29.5 + 793 / 25920)
         }
 
-        // function hebrewCalendarElapsedDaysALT(year) {
+        // function hebrewCalendarElapsedDaysALT(year: number): number {
         //     var monthsElapsed = Math.floor((235*year - 234)/19)
         //     var partsElapsed = 12084 + 13753*monthsElapsed
         //     var day = 29*monthsElapsed + Math.floor(partsElapsed/25920)
@@ -524,7 +521,7 @@ export namespace Calendars {
         //     return day
         // }
 
-        function elapsedDays(year) {
+        function elapsedDays(year: number): number {
             const d = Math.floor(molad(year, TISHRI) - EPOCH + 0.5)
             if (_mod(3 * (d + 1), 7) < 3) {
                 return d + 1
@@ -532,7 +529,7 @@ export namespace Calendars {
             return d
         }
 
-        function newYearDelay(year) {
+        function newYearDelay(year: number): number {
             const ny0 = elapsedDays(year - 1)
             const ny1 = elapsedDays(year)
             const ny2 = elapsedDays(year + 1)
@@ -545,25 +542,25 @@ export namespace Calendars {
             return 0
         }
 
-        export function newYear(year) {
+        export function newYear(year: number): number {
             return EPOCH + elapsedDays(year) + newYearDelay(year)
         }
 
-        function daysInYear(year) {
+        function daysInYear(year: number): number {
             return newYear(year + 1) - newYear(year)
         }
 
-        function isLongMarheshvan(year): boolean {
+        function isLongMarheshvan(year: number): boolean {
             const d = daysInYear(year)
             return d === 355 || d === 385
         }
 
-        function isShortKislev(year): boolean {
+        function isShortKislev(year: number): boolean {
             const d = daysInYear(year)
             return d === 353 || d === 383
         }
 
-        function lastDayOfMonth(year, month) {
+        function lastDayOfMonth(year: number, month: number): number {
             if ([2, 4, 6, 10, 13].indexOf(month) !== -1 ||
                 (month === 12 && !isLeapYear(year)) ||
                 (month === 8 && !isLongMarheshvan(year)) ||
@@ -579,7 +576,7 @@ export namespace Calendars {
          * @param {*} month
          * @param {*} day
          */
-        export function toFixed(year, month, day) {
+        export function toFixed(year: number, month: number, day: number): number {
             const lastMonth = isLeapYear(year) ? 13 : 12
             let sum = 0
             if (month < TISHRI) {
@@ -601,7 +598,7 @@ export namespace Calendars {
          * Returns the Hebrew date as an array for the given RD
          * @param {*} date
          */
-        export function fromFixed(date: number): number[] {
+        export function fromFixed(date: number): DateArray {
             const approx = Math.floor((date - EPOCH) * 98496 / 35975351) + 1
             let year = approx - 1
             for (;;) {
@@ -628,58 +625,58 @@ export namespace Calendars {
 
     // TIME FUNCTIONS
     export namespace Time {
-        export function universalFromLocal(t, locale: Locale) {
+        export function universalFromLocal(t: number, locale: Locale): number {
             return t - locale.longitude / 360
         }
 
-        export function localFromUniversal(t, locale: Locale) {
+        export function localFromUniversal(t: number, locale: Locale): number {
             return t + locale.longitude / 360
         }
 
-        export function standardFromUniversal(t, locale: Locale) {
+        export function standardFromUniversal(t: number, locale: Locale): number {
             return t + locale.zone / 24
         }
 
-        export function universalFromStandard(t, locale: Locale) {
+        export function universalFromStandard(t: number, locale: Locale): number {
             return t - locale.zone / 24
         }
 
-        export function standardFromLocal(t, locale: Locale) {
+        export function standardFromLocal(t: number, locale: Locale): number {
             return standardFromUniversal(universalFromLocal(t, locale), locale)
         }
 
-        export function localFromStandard(t, locale: Locale) {
+        export function localFromStandard(t: number, locale: Locale): number {
             return localFromUniversal(universalFromStandard(t, locale), locale)
         }
 
-        export function dynamicalFromUniversal(t) {
+        export function dynamicalFromUniversal(t: number): number {
             return t + deltat.deltaT(JD.fromFixed(t))
         }
 
-        export function universalFromDynamical(t) {
+        export function universalFromDynamical(t: number): number {
             return t - deltat.deltaT(JD.fromFixed(t))
         }
 
-        export function apparentFromLocal(t) {
+        export function apparentFromLocal(t: number): number {
             return t + eqtime.eSmart(JD.fromFixed(t))
         }
 
-        export function localFromApparent(t) {
+        export function localFromApparent(t: number): number {
             return t - eqtime.eSmart(JD.fromFixed(t))
         }
 
-        export function midnight(date, locale: Locale) {
+        export function midnight(date: number, locale: Locale) {
             return standardFromLocal(localFromApparent(Math.floor(date)), locale)
         }
 
-        export function midday(date, locale: Locale) {
+        export function midday(date: number, locale: Locale) {
             return standardFromLocal(localFromApparent(Math.floor(date) + 0.5), locale)
         }
     }
 
     // MOVE TO namespace Astronomy?
     // TODO add parameter locale, so that equinox occuring on same day in the locale is returned
-    function _vernalEquinoxOnOrBefore(date) {
+    function _vernalEquinoxOnOrBefore(date: number): number {
         const year = Gregorian.yearFromFixed(date)
         let spring = JD.toFixed(solstice.march(year))
         if (spring > date) {
@@ -688,7 +685,7 @@ export namespace Calendars {
         return spring
     }
 
-    function _autumnalEquinoxOnOrBefore(date) {
+    function _autumnalEquinoxOnOrBefore(date: number): number {
         const year = Gregorian.yearFromFixed(date)
         let autumn = JD.toFixed(solstice.september(year))
         if (autumn > date) {
@@ -697,7 +694,7 @@ export namespace Calendars {
         return autumn
     }
 
-    export function momentFromDepression(approx, locale: Locale, angle) {
+    export function momentFromDepression(approx: number, locale: Locale, angle: number): number {
         const t = Time.universalFromLocal(approx, locale)
         const δ = solar.apparentEquatorial(JD.fromFixed(t)).dec // in radians
         const morning = _mod(approx, 1) < 0.5 ? -1 : 1
@@ -710,7 +707,7 @@ export namespace Calendars {
             + morning * (_mod(0.5 + Math.asin(sineOffset) / (2 * π), 1) - 0.25))
     }
 
-    export function dawn(date, locale: Locale, angle) {
+    export function dawn(date: number, locale: Locale, angle: number): number {
         const approx = momentFromDepression(date + 0.25, locale, angle)
         const x = approx == null ? date : approx
         const result = momentFromDepression(x, locale, angle)
@@ -720,7 +717,7 @@ export namespace Calendars {
         return Time.standardFromLocal(result, locale)
     }
 
-    export function dusk(date, locale: Locale, angle) {
+    export function dusk(date: number, locale: Locale, angle: number): number {
         const approx = momentFromDepression(date + 0.75, locale, angle)
         const x = approx == null ? date + 0.99 : approx
         const result = momentFromDepression(x, locale, angle)
@@ -744,14 +741,14 @@ export namespace Calendars {
             return 5 / 6 + dip
         }
 
-        export function sunrise(date, locale: Locale): number {
+        export function sunrise(date: number, locale: Locale): number {
             return dawn(date, locale, _angle(locale.elevation))
         }
-        export function sunset(date, locale: Locale): number {
+        export function sunset(date: number, locale: Locale): number {
             return dusk(date, locale, _angle(locale.elevation))
         }
 
-        export function isCrescentVisible(date, locale: Locale): boolean {
+        export function isCrescentVisible(date: number, locale: Locale): boolean {
             // method from meeus: ... should be adapted to 4.5° instead of 6°
             /*
             let _date = new julian.Calendar().fromJD(JD.fromFixed(date-1))
@@ -780,7 +777,7 @@ export namespace Calendars {
             return crit
         }
 
-        export function phasisOnOrBefore(date, locale: Locale): number {
+        export function phasisOnOrBefore(date: number, locale: Locale): number {
             // const t = Time.dynamicalFromUniversal(Time.universalFromStandard(date + 1, locale))
             const jde = JD.fromFixed(date + 1)
             const lunarPos = moonposition.position(jde)
@@ -804,7 +801,7 @@ export namespace Calendars {
         }
 
         /*
-        export function lastNewMoon(date) {
+        export function lastNewMoon(date: number): number {
             let jde = JD.fromFixed(date)
             let year = astro.JDEToBesselianYear(jde) // NOT SURE ABOUT THIS ONE !!!
             let newMoon = moonphase.newMoon(year)
@@ -842,7 +839,7 @@ export namespace Calendars {
             zone : 2,
         }
 
-        export function toFixed(year, month, day, locale?: Locale) {
+        export function toFixed(year: number, month:number, day:number, locale?: Locale): number {
             if (!locale) {
                 locale = CAIRO
             }
@@ -850,7 +847,7 @@ export namespace Calendars {
             return Astronomy.phasisOnOrBefore(midMonth, locale) + day - 1
         }
 
-        export function fromFixed(date: number, locale?: Locale): number[] {
+        export function fromFixed(date: number, locale?: Locale): DateArray {
             if (!locale) {
                 locale = CAIRO
             }
@@ -871,18 +868,18 @@ export namespace Calendars {
 
         export const EPOCH = 226896 // = Julian.toFixed(622,3,19)
 
-        const TEHRAN: Locale = {
+        export const TEHRAN: Locale = {
             latitude: 35.68,
             longitude: 51.42,
             elevation: 1100,
             zone: 3.5,
         }
 
-        function middayInTehran(date) {
+        function middayInTehran(date: number): number {
             return Time.universalFromStandard(Time.midday(date, TEHRAN), TEHRAN)
         }
 
-        function newYearOnOrBefore(date) {
+        function newYearOnOrBefore(date: number): number {
             const previousEquinox = _vernalEquinoxOnOrBefore(date + 1) // FIXME
             if (previousEquinox < middayInTehran(previousEquinox)) {
                 return Math.floor(previousEquinox)
@@ -891,7 +888,7 @@ export namespace Calendars {
             }
         }
 
-        export function toFixed(year, month, day) {
+        export function toFixed(year: number, month: number, day: number): number {
             const _y = (year > 0 ? year - 1 : year)
             const newYear = newYearOnOrBefore(EPOCH + 180 +
                 Math.floor(Astronomy.MEAN_TROPICAL_YEAR * _y))
@@ -899,7 +896,7 @@ export namespace Calendars {
             return newYear - 1 + _m + day
         }
 
-        export function fromFixed(date): number[] {
+        export function fromFixed(date: number): DateArray {
             const newYear = newYearOnOrBefore(date)
             const y = Math.round((newYear - EPOCH) / Astronomy.MEAN_TROPICAL_YEAR) + 1
             const year = (y > 0 ? y : y - 1)
@@ -912,7 +909,7 @@ export namespace Calendars {
             return toArray(year, month, day)
         }
 
-        export function isLeapYear(year): boolean {
+        export function isLeapYear(year: number): boolean {
             return (toFixed(year + 1, 1, 1) - toFixed(year, 1, 1) === 366)
         }
     }
@@ -920,18 +917,18 @@ export namespace Calendars {
     // ---------------- FRENCH REVOLUTIONARY CALENDAR -------------------//
     export namespace French {
         export const EPOCH = 654415 // Gregorian.toFixed(1792,9,22)
-        const PARIS: Locale = {
+        export const PARIS: Locale = {
             latitude: 48 + 50 / 60 + 11 / 3600,
             longitude: 2 + 20 / 60 + 15 / 3600,
             elevation: 27,
             zone: 1,
         }
 
-        function midnightInParis(date) {
+        function midnightInParis(date: number): number {
             return Time.universalFromStandard(Time.midnight(date + 1, PARIS), PARIS)
         }
 
-        function newYearOnOrBefore(date) {
+        function newYearOnOrBefore(date: number): number {
             const previousEquinox = _autumnalEquinoxOnOrBefore(date + 1)
             if (previousEquinox < midnightInParis(previousEquinox)) {
                 return Math.floor(previousEquinox)
@@ -940,12 +937,12 @@ export namespace Calendars {
             }
         }
 
-        export function toFixed(year, month, day) {
+        export function toFixed(year: number, month: number, day: number): number {
             const newYear = newYearOnOrBefore(Math.floor(EPOCH + 180 + Astronomy.MEAN_TROPICAL_YEAR * (year - 1)))
             return newYear - 1 + 30 * (month - 1) + day
         }
 
-        export function fromFixed(date): number[] {
+        export function fromFixed(date: number): DateArray {
             const newYear = newYearOnOrBefore(date)
             const year = Math.round((newYear - EPOCH) / Astronomy.MEAN_TROPICAL_YEAR) + 1
             const month = Math.floor((date - newYear) / 30) + 1
@@ -953,7 +950,7 @@ export namespace Calendars {
             return toArray(year, month, day)
         }
 
-        export function isLeapYear(year): boolean {
+        export function isLeapYear(year: number): boolean {
             return (toFixed(year + 1, 1, 1) - toFixed(year, 1, 1) === 366)
         }
         /**
@@ -961,13 +958,13 @@ export namespace Calendars {
          */
         export namespace Modified {
 
-            export function isLeapYear(year): boolean {
+            export function isLeapYear(year: number): boolean {
                 return (_mod(year, 4) === 0
                     && [100, 200, 300].indexOf(_mod(year, 400)) === -1
                     && _mod(year, 4000) !== 0)
             }
     
-            export function toFixed(year, month, day) {
+            export function toFixed(year: number, month: number, day: number): number {
                 return EPOCH - 1 + 365 * (year - 1)
                     + Math.floor((year - 1) / 4)
                     - Math.floor((year - 1) / 100)
@@ -976,7 +973,7 @@ export namespace Calendars {
                     + 30 * (month - 1) + day
             }
     
-            export function fromFixed(date): number[] {
+            export function fromFixed(date: number): DateArray {
                 let year = Math.floor(4000 * (date - EPOCH + 2) / 1460969) + 1
                 if (date < toFixed(year, 1, 1)) {
                     year = year - 1
@@ -995,11 +992,11 @@ export namespace Calendars {
 
             export const EPOCH = -1137142
 
-            export function toFixed(baktun, katun, tun, uinal, kin) {
+            export function toFixed(baktun: number, katun: number, tun: number, uinal: number, kin: number): number {
                 return EPOCH + baktun * 144000 + katun * 7200 + tun * 360 + uinal * 20 + kin
             }
 
-            export function fromFixed(date) {
+            export function fromFixed(date: number): [number, number, number, number, number] {
                 const longCount = date - EPOCH
                 const baktun = Math.floor(longCount / 144000)
                 const dayOfBaktun = _mod(longCount, 144000)
@@ -1014,44 +1011,44 @@ export namespace Calendars {
         }
         export namespace Haab {
 
-            export function ordinal(month, day) {
+            export function ordinal(month:number, day:number): number {
                 return (month - 1) * 20 + day
             }
 
             export const EPOCH = Mayan.LongCount.EPOCH - ordinal(18, 8)
 
-            export function fromFixed(date): number[] {
+            export function fromFixed(date: number): [number, number] {
                 const count = _mod(date - EPOCH, 365)
                 const day = _mod(count, 20)
                 const month = Math.floor(count / 20) + 1
                 return [month, day]
             }
 
-            export function onOrBefore(haabMonth, haabDay, date) {
+            export function onOrBefore(haabMonth: number, haabDay: number, date: number) {
                 return date - _mod(date - EPOCH - ordinal(haabMonth, haabDay), 365)
             }
         }
         export namespace Tzolkin {
 
-            export function ordinal(number, name) {
+            export function ordinal(number: number, name: number): number {
                 return _mod(number - 1 + 39 * (number - name), 260)
             }
 
             export const EPOCH = Mayan.LongCount.EPOCH - ordinal(4, 20)
 
-            export function fromFixed(date) {
+            export function fromFixed(date: number): [number, number] {
                 const count = date - EPOCH + 1
                 const number = _amod(count, 13)
                 const name = _amod(count, 20)
                 return [number, name]
             }
 
-            export function onOrBefore(tzolkinNumber, tzolkinName, date) {
+            export function onOrBefore(tzolkinNumber: number, tzolkinName: number, date: number): number {
                 return date - _mod(date - EPOCH - ordinal(tzolkinNumber, tzolkinName), 260)
             }
         }
 
-        export function roundOnOrBefore(haabMonth, haabDay, tzolkinNumber, tzolkinName, date) {
+        export function roundOnOrBefore(haabMonth: number, haabDay: number, tzolkinNumber: number, tzolkinName: number, date: number): number {
             const haabCount = Haab.ordinal(haabMonth, haabDay) + LongCount.EPOCH
             const tzolkinCount = Tzolkin.ordinal(tzolkinNumber, tzolkinName) + LongCount.EPOCH
             const diff = tzolkinCount - haabCount

@@ -1,8 +1,12 @@
 {
     "compilerOptions": {
-        "target": "es6",
+        "target": "es5",
         "module": "commonjs",
         "sourceMap": true,
+        "declaration": true,
+        "noImplicitAny": true,
+        "preserveConstEnums": true,
+        "removeComments": false,
         "outDir" : "dist"
     }
 }

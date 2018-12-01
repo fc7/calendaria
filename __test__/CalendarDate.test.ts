@@ -3,7 +3,7 @@ import * as csvparse from 'csv-parse/lib/sync';
 import * as fs  from 'fs';
 import * as path from 'path';
 
-function fixture(name): object[] {
+function fixture(name: string): Array<any> {
     let input = fs.readFileSync(path.join(__dirname, 'test_data', name), {encoding: "utf8"});
     return csvparse(input, {
         columns: true

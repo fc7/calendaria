@@ -5,3 +5,4 @@ astro.js
 test*.js
 tmp*
 lib
+__test__/test_data/mydates5.csv
