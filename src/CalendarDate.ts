@@ -20,8 +20,6 @@ export enum CalendarType {
     MayanTzolkin,
 }
 
-
-
 function validateTimezone(z: number): void {
     if (z < -12 || z > 14) {
         throw new Error(`Illegal Time Zone '${z}'!`)
@@ -152,6 +150,40 @@ export class CalendarDate {
             default:
                 return Calendars.Gregorian.isLeapYear(Calendars.Gregorian.fromFixed(this.rd)[0])
         }
+    }
+
+    public dayOfYear(type?: CalendarType): number {
+        let firstDay = 0
+        switch (type) {
+            case CalendarType.Armenian:
+                firstDay = Calendars.Armenian.toFixed(Calendars.Armenian.fromFixed(this.rd)[0],1,1)
+            case CalendarType.Coptic:
+                firstDay = Calendars.Coptic.toFixed(Calendars.Coptic.fromFixed(this.rd)[0],1,1)
+            case CalendarType.Egyptian:
+                firstDay = Calendars.Egyptian.toFixed(Calendars.Egyptian.fromFixed(this.rd)[0],1,1)
+            case CalendarType.Ethiopic:
+                firstDay = Calendars.Ethiopic.toFixed(Calendars.Ethiopic.fromFixed(this.rd)[0],1,1)
+            case CalendarType.Gregorian:
+                firstDay = Calendars.Gregorian.toFixed(Calendars.Gregorian.fromFixed(this.rd)[0],1,1)
+            case CalendarType.ISO:
+                firstDay = Calendars.ISO.toFixed(Calendars.ISO.fromFixed(this.rd)[0],1,1)
+            case CalendarType.Hebrew:
+                firstDay = Calendars.Hebrew.toFixed(Calendars.Hebrew.fromFixed(this.rd)[0],1,1)
+            case CalendarType.Islamic:
+                firstDay = Calendars.Islamic.toFixed(Calendars.Islamic.fromFixed(this.rd)[0],1,1)
+            case CalendarType.Julian:
+            case CalendarType.Roman:
+                firstDay = Calendars.Julian.toFixed(Calendars.Julian.fromFixed(this.rd)[0],1,1)
+            case CalendarType.Persian:
+                firstDay = Calendars.Persian.toFixed(Calendars.Persian.fromFixed(this.rd)[0],1,1)
+            case CalendarType.French:
+                firstDay = Calendars.French.toFixed(Calendars.French.fromFixed(this.rd)[0],1,1) 
+            case CalendarType.ModifiedFrench:
+                firstDay = Calendars.French.Modified.toFixed(Calendars.French.Modified.fromFixed(this.rd)[0],1,1)
+            default:
+                firstDay = Calendars.Gregorian.toFixed(Calendars.Gregorian.fromFixed(this.rd)[0],1,1)
+        }
+        return this.rd - firstDay + 1
     }
 
     public toJulianDayNumber(): number {

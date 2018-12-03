@@ -52,6 +52,10 @@ describe('simple tests', () => {
         const cd = new DateBuilder(CalendarType.ISO).year(2019).week(1).day(1).build()
         expect(cd.convertTo(CalendarType.Gregorian)).toEqual([2018,12,31,0,0,0])
     })
+    test('test day of year', () => {
+        const d = new DateBuilder(CalendarType.Gregorian, 2018, 4, 14).build()
+        expect(d.dayOfYear()).toBe(31+28+31+14)
+    })  
 })
 
 describe('test dates1.csv for: JD, MJD, Weekday and calendars: Egyptian, Gregorian, ISO, Coptic, Julian, Roman, Armenian', () => {
