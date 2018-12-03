@@ -1,4 +1,5 @@
-import {CalendarDate, CalendarType} from '../src/CalendarDate';
+import {CalendarDate, CalendarType, DateBuilder} from '../src/CalendarDate';
+import {Calendars, Weekday} from "../src/Calendars"
 import * as csvparse from 'csv-parse/lib/sync';
 import * as fs  from 'fs';
 import * as path from 'path';
@@ -22,13 +23,48 @@ function numericArray(record: any, columns: string[], zeroPadding?: boolean): nu
     return (padding ? arr.concat([0,0,0]) : arr);
 }
 
+describe('simple tests', () => {
+    test('test empty constructor', () => {
+        const calDateCurrent = new CalendarDate()
+        const jsDateCurrent = new Date()
+        expect(calDateCurrent.toJulianDayNumber()).toBeGreaterThan(0)
+        expect(calDateCurrent.weekday()).toBeGreaterThanOrEqual(0)
+        expect(calDateCurrent.weekday()).toBeLessThan(7)
+        expect(calDateCurrent.weekday()).toBe(jsDateCurrent.getDay())
+        expect(Math.floor(calDateCurrent.toDate().getMilliseconds()/1000)).toBe(Math.floor(jsDateCurrent.getMilliseconds()/1000))
+    })
+    test('test constructor with rd argument', () => {
+        const cd = new CalendarDate(737031) // Monday 3 December 2018
+        expect(cd.toDate().toISOString()).toBe('2018-12-03T00:00:00.000Z')
+        expect(cd.weekday()).toBe(Weekday.Monday)
+        expect(cd.add(2).weekday()).toBe(Weekday.Wednesday)
+        expect(cd.toJulianDayNumber()).toBe(737031 - Calendars.JD.EPOCH)
+        expect(cd.closestWeekdayAfter(Weekday.Thursday).toRD()).toBe(cd.add(3).toRD())
+        expect(cd.isLeapYear()).toBe(false)
+    })
+    test('test constructor with specific Date', () => {
+        const cd = new CalendarDate(new Date('2018-12-03T00:00:00.000Z')) // 3 December 2018
+        expect(cd.toDate().toISOString()).toBe('2018-12-03T00:00:00.000Z')
+        expect(cd.toRD()).toBe(737031)
+    })
+    test('test date builder gregorian with zone', () => {
+        const cd = new DateBuilder(CalendarType.Gregorian).year(2018).month(12).day(3).hours(9).min(32).zone(1).build()
+        expect(cd.toRD()).toBeCloseTo(737031 + 9/24 + 32/(24*60) - 1/24)
+        // expect(cd.toISOString()).toBe('2018-12-03T09:32:00.000+01:00') //FIXME this gives 9:31:59.999 !!!
+    })
+    test('test iso date', () => {
+        const cd = new DateBuilder(CalendarType.ISO).year(2019).week(1).day(1).build()
+        expect(cd.convertTo(CalendarType.Gregorian)).toEqual([2018,12,31,0,0,0])
+    })
+})
+
 describe('test dates1.csv for calendars: JD, Egyptian, Gregorian, Coptic, Julian, Armenian', () => {
     const data1 = fixture('dates1.csv')
     //expect(data1.length).toBeGreaterThan(0);
     data1.forEach((record) => {
         let rd = parseInt(record["RD"])
         test(`test calendar conversions for RD date ${rd}`, () => {
-            let d = CalendarDate.fromFixed(rd);
+            let d = CalendarDate.fromRD(rd);
             expect(d.toJulianDayNumber().toString())
                 .toBe(record["JD"]);
             expect(d.convertTo(CalendarType.Egyptian))
@@ -51,7 +87,7 @@ describe('test dates2.csv for calendars: Ethiopic, Islamic, Mayan', () => {
     data2.forEach( record => {
         let rd = parseInt(record["RD"])
         test(`test calendar conversions for RD date ${rd}`, () => {
-            let d = CalendarDate.fromFixed(rd)
+            let d = CalendarDate.fromRD(rd)
             expect(d.convertTo(CalendarType.Ethiopic))
                 .toEqual(numericArray(record,["EthiopicYear","EthiopicMonth","EthiopicDay"]));
             expect(d.convertTo(CalendarType.Islamic))
@@ -77,7 +113,7 @@ describe('test dates3.csv for calendars: Hebrew + Persian + French', () => {
     data3.forEach( record => {
         let rd = parseInt(record["RD"])
         test(`test calendar conversions for RD date ${rd}`, () => {
-            let d = CalendarDate.fromFixed(rd)
+            let d = CalendarDate.fromRD(rd)
             expect(d.convertTo(CalendarType.Hebrew))
                 .toEqual(numericArray(record,["HebrewYear","HebrewMonth","HebrewDay"]));
             expect(d.convertTo(CalendarType.Persian))
@@ -97,7 +133,7 @@ describe('test dates4.csv for calendars: Chinese + Old Hindu + Hindu', () => {
     data4.forEach( record => {
         let rd = parseInt(record["RD"])
         test(`test calendar conversions for RD date ${rd}`, () => {
-            let d = CalendarDate.fromFixed(rd)
+            let d = CalendarDate.fromRD(rd)
             // expect(d.convertTo(CalendarType.Chinese))
             //     .toEqual(numericArray(record,["ChineseCycle","ChineseYear","ChineseMonth","ChineseDay","ChineseNameOfDayStem","ChineseNameOfDayBranch","ChineseNextZhongqi"]));
             // let expectedLeap = record["ChineseMonthLeap"] == "t" ? true : false;
