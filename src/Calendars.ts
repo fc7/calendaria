@@ -3,7 +3,7 @@
  * Reingold & Dershowitz, Calendrical Calculations, The Millenium Edition, Cambridge University Press, 2001.
  *
  * The arithmetic formulae are reproduced almost verbatim from Reingold & Dershowitz.
- * For the purely astronomical calculations however, I rely mostly on the
+ * For the purely astronomical calculations however, we rely mostly on the
  * npm package astronomia (https://github.com/commenthol/astronomia),
  * itself derived from the go package meeus (https://github.com/soniakeys/meeus).
  *
@@ -19,9 +19,9 @@ import * as nutation from 'astronomia/lib/nutation'
 import * as sidereal from 'astronomia/lib/sidereal'
 /* Only necessary for using the high-precision functions solstice.march2, solstice.september2 and eqtime.e
     which take EARTH as second parameter */
-// const planetposition from 'astronomia/lib/planetposition'
-// const data from 'astronomia/data'
-// const EARTH = new planetposition.Planet(data.earth)
+import * as planetposition from 'astronomia/lib/planetposition'
+import * as data from 'astronomia/data'
+const EARTH = new planetposition.Planet(data.earth)
 import * as solar from 'astronomia/lib/solar'
 import * as solstice from 'astronomia/lib/solstice'
 import * as coord from 'astronomia/lib/coord'
@@ -651,6 +651,7 @@ export namespace Calendars {
         }
     }
 
+    const SECONDS_PER_DAY = 86400;
     // ASTRONOMICAL CALENDARS
 
     // TIME FUNCTIONS
@@ -680,19 +681,21 @@ export namespace Calendars {
         }
 
         export function dynamicalFromUniversal(t: number): number {
-            return t + deltat.deltaT(JD.fromFixed(t))
+            const dyear = astro.JDEToBesselianYear(JD.fromFixed(t))
+            return t + deltat.deltaT(dyear)/SECONDS_PER_DAY
         }
 
         export function universalFromDynamical(t: number): number {
-            return t - deltat.deltaT(JD.fromFixed(t))
+            const dyear = astro.JDEToBesselianYear(JD.fromFixed(t))
+            return t - deltat.deltaT(dyear)/SECONDS_PER_DAY
         }
 
         export function apparentFromLocal(t: number): number {
-            return t + eqtime.eSmart(JD.fromFixed(t))
+            return t + eqtime.e(JD.fromFixed(t), EARTH)/(2*π)
         }
 
         export function localFromApparent(t: number): number {
-            return t - eqtime.eSmart(JD.fromFixed(t))
+            return t - eqtime.e(JD.fromFixed(t), EARTH)/(2*π)
         }
 
         export function midnight(date: number, locale: Locale) {
@@ -766,7 +769,7 @@ export namespace Calendars {
 
         function _angle(elevation: number): number {
             const h = Math.max(0, elevation)
-            const R = 6.372 * 10E6
+            const R = 6371000 // earth radius in meters
             const dip = Math.acos(R / (R + h)) / D2R
             return 5 / 6 + dip
         }
