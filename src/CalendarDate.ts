@@ -19,89 +19,139 @@ export enum CalendarType {
     MayanTzolkin,
 }
 
+
+
+function validateTimezone(z: number): void {
+    if (z < -12 || z > 14) {
+        throw new Error(`Illegal Time Zone '${z}'!`)
+    }
+}
+
 export class CalendarDate {
 
-    public static fromFixed(fixed: number): CalendarDate {
+    private rd: number
+    private date: Date
+    private timeZone: number = 0
+    constructor(date?: Date | number, timezone?: number) {
+        if (!date) {
+            date = new Date()
+        }
+        if (date instanceof Date) {
+            this.date = date
+            this.rd = Calendars.toFixed(date)
+        } else {
+            this.rd = date
+            this.date = Calendars.fromFixed(date)
+        }
+        if (timezone) {
+            validateTimezone(timezone)
+            this.timeZone = timezone
+        }
+    }
+
+    public static fromRD(fixed: number): CalendarDate {
         return new CalendarDate(Calendars.fromFixed(fixed))
     }
-    private fixed: number
-    private date: Date
 
-    constructor(date: Date) {
-        this.date = date
-        this.fixed = Calendars.toFixed(date)
+    public toRD(): number {
+        return this.rd
+    }
+
+    public toISOString(): string {
+        let gDate = this.add(this.timeZone/24).convertTo(CalendarType.Gregorian)
+        let padZero = (x:number): string => {
+            return (x<10 ? '0'+x : String(x))
+        }
+        let formatSec = (x:number): string => {
+            let str = x<10 ? '0' : ''
+            return str + x.toFixed(3)
+        }
+        let tzStr = 'Z'
+        let tzInt = Math.floor(this.timeZone)
+        let tzFrac = Math.round((this.timeZone - tzInt)*60)
+        if (this.timeZone != 0) {
+            tzStr = this.timeZone<0 ? '-' : '+'
+            tzStr += padZero(tzInt) + ':' + padZero(tzFrac)
+        }
+        return gDate.splice(0,3).map(padZero).join('-') 
+            + 'T' 
+            + gDate.splice(0,2).map(padZero).join(':') 
+            + ':' 
+            + formatSec(gDate.pop()) 
+            + tzStr
     }
 
     public convertTo(type: CalendarType): number[] {
         switch (type) {
             case CalendarType.Armenian:
-                return Calendars.Armenian.fromFixed(this.fixed)
+                return Calendars.Armenian.fromFixed(this.rd)
             case CalendarType.Coptic:
-                return Calendars.Coptic.fromFixed(this.fixed)
+                return Calendars.Coptic.fromFixed(this.rd)
             case CalendarType.Egyptian:
-                return Calendars.Egyptian.fromFixed(this.fixed)
+                return Calendars.Egyptian.fromFixed(this.rd)
             case CalendarType.Ethiopic:
-                return Calendars.Ethiopic.fromFixed(this.fixed)
+                return Calendars.Ethiopic.fromFixed(this.rd)
             case CalendarType.Gregorian:
-                return Calendars.Gregorian.fromFixed(this.fixed)
+                return Calendars.Gregorian.fromFixed(this.rd)
             case CalendarType.Hebrew:
-                return Calendars.Hebrew.fromFixed(this.fixed)
+                return Calendars.Hebrew.fromFixed(this.rd)
             case CalendarType.ISO:
-                return Calendars.ISO.fromFixed(this.fixed)
+                return Calendars.ISO.fromFixed(this.rd)
             case CalendarType.Islamic:
-                return Calendars.Islamic.fromFixed(this.fixed)
+                return Calendars.Islamic.fromFixed(this.rd)
             case CalendarType.ObservationalIslamic:
-                return Calendars.ObservationalIslamic.fromFixed(this.fixed)
+                return Calendars.ObservationalIslamic.fromFixed(this.rd)
             case CalendarType.Julian:
-                return Calendars.Julian.fromFixed(this.fixed)
+                return Calendars.Julian.fromFixed(this.rd)
             case CalendarType.Persian:
-                return Calendars.Persian.fromFixed(this.fixed)
+                return Calendars.Persian.fromFixed(this.rd)
             case CalendarType.French:
-                return Calendars.French.fromFixed(this.fixed)
+                return Calendars.French.fromFixed(this.rd)
             case CalendarType.ModifiedFrench:
-                return Calendars.French.Modified.fromFixed(this.fixed)
+                return Calendars.French.Modified.fromFixed(this.rd)
             case CalendarType.MayanLongCount:
-                return Calendars.Mayan.LongCount.fromFixed(this.fixed)
+                return Calendars.Mayan.LongCount.fromFixed(this.rd)
             case CalendarType.MayanHaab:
-                return Calendars.Mayan.Haab.fromFixed(this.fixed)
+                return Calendars.Mayan.Haab.fromFixed(this.rd)
             case CalendarType.MayanTzolkin:
-                return Calendars.Mayan.Tzolkin.fromFixed(this.fixed)
+                return Calendars.Mayan.Tzolkin.fromFixed(this.rd)
             default:
-                return Calendars.Gregorian.fromFixed(this.fixed)
+                return Calendars.Gregorian.fromFixed(this.rd)
         }
     }
 
-    public isLeapYear(type: CalendarType): boolean {
+    public isLeapYear(type?: CalendarType): boolean {
         switch (type) {
             case CalendarType.Armenian:
                 return false
             case CalendarType.Coptic:
-                return Calendars.Coptic.isLeapYear(Calendars.Coptic.fromFixed(this.fixed)[0])
+                return Calendars.Coptic.isLeapYear(Calendars.Coptic.fromFixed(this.rd)[0])
             case CalendarType.Egyptian:
                 return false
             case CalendarType.Ethiopic:
-                return Calendars.Coptic.isLeapYear(Calendars.Coptic.fromFixed(this.fixed)[0])
+                return Calendars.Coptic.isLeapYear(Calendars.Coptic.fromFixed(this.rd)[0])
             case CalendarType.Gregorian:
-                return Calendars.Gregorian.isLeapYear(Calendars.Gregorian.fromFixed(this.fixed)[0])
+            case CalendarType.ISO:
+                return Calendars.Gregorian.isLeapYear(Calendars.Gregorian.fromFixed(this.rd)[0])
             case CalendarType.Hebrew:
-                return Calendars.Hebrew.isLeapYear(Calendars.Hebrew.fromFixed(this.fixed)[0])
+                return Calendars.Hebrew.isLeapYear(Calendars.Hebrew.fromFixed(this.rd)[0])
             case CalendarType.Islamic:
-                return Calendars.Islamic.isLeapYear(Calendars.Islamic.fromFixed(this.fixed)[0])
+                return Calendars.Islamic.isLeapYear(Calendars.Islamic.fromFixed(this.rd)[0])
             case CalendarType.Julian:
-                return Calendars.Julian.isLeapYear(Calendars.Julian.fromFixed(this.fixed)[0])
+                return Calendars.Julian.isLeapYear(Calendars.Julian.fromFixed(this.rd)[0])
             case CalendarType.Persian:
-                return Calendars.Persian.isLeapYear(Calendars.Persian.fromFixed(this.fixed)[0])
+                return Calendars.Persian.isLeapYear(Calendars.Persian.fromFixed(this.rd)[0])
             case CalendarType.French:
-                return Calendars.French.isLeapYear(Calendars.French.fromFixed(this.fixed)[0])
+                return Calendars.French.isLeapYear(Calendars.French.fromFixed(this.rd)[0])
             case CalendarType.ModifiedFrench:
-                return Calendars.French.Modified.isLeapYear(Calendars.French.Modified.fromFixed(this.fixed)[0])
+                return Calendars.French.Modified.isLeapYear(Calendars.French.Modified.fromFixed(this.rd)[0])
             default:
-                return Calendars.Gregorian.isLeapYear(Calendars.Gregorian.fromFixed(this.fixed)[0])
+                return Calendars.Gregorian.isLeapYear(Calendars.Gregorian.fromFixed(this.rd)[0])
         }
     }
 
     public toJulianDayNumber(): number {
-        return Calendars.JD.fromFixed(this.fixed)
+        return Calendars.JD.fromFixed(this.rd)
     }
 
     public toDate(): Date {
@@ -109,19 +159,19 @@ export class CalendarDate {
     }
 
     public closestWeekdayOnOrBefore(weekday: Weekday): CalendarDate {
-        return new CalendarDate(Calendars.fromFixed(Calendars.weekDayOnOrBefore(this.fixed, weekday)))
+        return new CalendarDate(Calendars.fromFixed(Calendars.weekdayOnOrBefore(this.rd, weekday)))
     }
 
     public closestWeekdayAfter(weekday: Weekday): CalendarDate {
-        return new CalendarDate(Calendars.fromFixed(Calendars.weekDayAfter(this.fixed, weekday)))
+        return new CalendarDate(Calendars.fromFixed(Calendars.weekdayAfter(this.rd, weekday)))
     }
 
     public weekday(): Weekday {
-        return Calendars.getWeekday(this.fixed)
+        return Calendars.getWeekday(this.rd)
     }
 
     public add(days: number): CalendarDate {
-        return new CalendarDate(Calendars.fromFixed(this.fixed + days))
+        return new CalendarDate(Calendars.fromFixed(this.rd + days))
     }
 }
 
@@ -172,14 +222,12 @@ export class DateBuilder {
         return this
     }
     public zone(z: number): DateBuilder {
-        if (z < 12 || z > 14) {
-            throw new Error("Illegal Time Zone!")
-        }
+        validateTimezone(z)
         this.z = z
         return this
     }
     public build(): CalendarDate {
-        const day = this.d + this.hh / 24 + this.mm / (24 * 60) + this.ss / (24 * 60 * 60) + this.z / 24
+        const day = this.d + this.hh / 24 + this.mm / (24 * 60) + this.ss / (24 * 60 * 60) - this.z / 24
         let fixed
         switch (this.t) {
             case CalendarType.Armenian:
@@ -225,6 +273,6 @@ export class DateBuilder {
                 fixed = Calendars.Gregorian.toFixed(this.y, this.m, day)
                 break
         }
-        return new CalendarDate(Calendars.fromFixed(fixed))
+        return new CalendarDate(fixed, this.z)
     }
 }
