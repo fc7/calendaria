@@ -80,7 +80,7 @@ export namespace Calendars {
      * @param {*} k weekday number (starting with 0 = Sunday)
      * @returns an RD date
      */
-    export function weekDayOnOrBefore(date: number, k: Weekday): number {
+    export function weekdayOnOrBefore(date: number, k: Weekday): number {
         return date - _mod((date - k), 7)
     }
     /**
@@ -89,8 +89,19 @@ export namespace Calendars {
      * @param {Weekday} k weekday number (starting with 0 = Sunday)
      * @returns an RD date
      */
-    export function weekDayAfter(date: number, k: Weekday): number {
-        return weekDayOnOrBefore(date + 7, k)
+    export function weekdayAfter(date: number, k: Weekday): number {
+        return weekdayOnOrBefore(date + 7, k)
+    }
+
+    export function nthWeekday(n: number, k: Weekday, date: number): number {
+        if (n>0) {
+            return 7*n + weekdayOnOrBefore(date-1, k)
+        }
+        return 7*n + weekdayAfter(date, k)
+    }
+
+    export function getWeekday(date: number): Weekday {
+        return Math.floor(date) % 7
     }
 
     // ---------------- JAVASCRIPT DATES -------------------//
@@ -384,7 +395,7 @@ export namespace Calendars {
                 adjustedEpact += 1
             }
             const paschalMoon = Calendars.Gregorian.toFixed(year, 4, 19) - adjustedEpact
-            return weekDayAfter(paschalMoon, Weekday.Sunday)
+            return weekdayAfter(paschalMoon, Weekday.Sunday)
         }
         /**
          * Returns the RD of the Orthodox Easter for the given Gregorian year
@@ -393,7 +404,7 @@ export namespace Calendars {
         export function Orthodox(year: number): number {
             const paschalMoon = 354 * year + 30 * Math.floor((7 * year + 8) / 19)
                 + Math.floor(year / 4) - Math.floor(year / 19) - 272
-            return weekDayAfter(paschalMoon, Weekday.Sunday)
+            return weekdayAfter(paschalMoon, Weekday.Sunday)
         }
 
     }
@@ -451,6 +462,25 @@ export namespace Calendars {
          */
         export function fromFixed(date: number): DateArray {
             return Coptic.fromFixed(date + Coptic.EPOCH - EPOCH)
+        }
+    }
+
+    export namespace ISO {
+
+        export function toFixed(year: number, week: number, day: number): number {
+            return nthWeekday(week, Weekday.Sunday, Gregorian.toFixed(year-1, 12, 28)) + day
+        }
+
+        export function fromFixed(date: number): DateArray {
+            let approx = Gregorian.yearFromFixed(date - 3)
+            let year = approx
+            if (date >= toFixed(approx+1, 1, 1)) {
+                year = approx + 1
+            }
+            const week = Math.floor((date - toFixed(year, 1, 1))/7) + 1
+            const day = _amod(date, 7)
+
+            return toArray(year, week, day)
         }
     }
 

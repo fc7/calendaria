@@ -7,6 +7,7 @@ export enum CalendarType {
     Armenian,
     Coptic,
     Ethiopic,
+    ISO,
     Islamic,
     ObservationalIslamic,
     Hebrew,
@@ -45,6 +46,8 @@ export class CalendarDate {
                 return Calendars.Gregorian.fromFixed(this.fixed)
             case CalendarType.Hebrew:
                 return Calendars.Hebrew.fromFixed(this.fixed)
+            case CalendarType.ISO:
+                return Calendars.ISO.fromFixed(this.fixed)
             case CalendarType.Islamic:
                 return Calendars.Islamic.fromFixed(this.fixed)
             case CalendarType.ObservationalIslamic:
@@ -113,6 +116,10 @@ export class CalendarDate {
         return new CalendarDate(Calendars.fromFixed(Calendars.weekDayAfter(this.fixed, weekday)))
     }
 
+    public weekday(): Weekday {
+        return Calendars.getWeekday(this.fixed)
+    }
+
     public add(days: number): CalendarDate {
         return new CalendarDate(Calendars.fromFixed(this.fixed + days))
     }
@@ -122,6 +129,7 @@ export class DateBuilder {
     public t: CalendarType
     public y: number = 1
     public m: number = 1
+    public w: number = 1
     public d: number = 1
     public hh: number = 0
     public mm: number = 0
@@ -138,6 +146,13 @@ export class DateBuilder {
     }
     public month(m: number): DateBuilder {
         this.m = m
+        return this
+    }
+    public week(w: number): DateBuilder {
+        if (this.t != CalendarType.ISO) {
+            throw new Error("The week method only applies for the ISO calendar")
+        }
+        this.w = w
         return this
     }
     public day(d: number): DateBuilder {
@@ -187,6 +202,9 @@ export class DateBuilder {
                 break
             case CalendarType.Islamic:
                 fixed = Calendars.Islamic.toFixed(this.y, this.m, day)
+                break
+            case CalendarType.ISO:
+                fixed = Calendars.ISO.toFixed(this.y, this.w, day)
                 break
             case CalendarType.ObservationalIslamic:
                 fixed = Calendars.ObservationalIslamic.toFixed(this.y, this.m, day)
