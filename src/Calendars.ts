@@ -381,6 +381,74 @@ export namespace Calendars {
         }
     }
 
+    export namespace Roman {
+        export enum RomanEvent {
+            Kalends = 1,
+            Nones,
+            Ides
+        }
+        function ides(month: number): number {
+            if ([3,5,7,10].indexOf(month) != -1) {
+                return 15
+            }
+            return 13
+        }
+        function nones(month: number): number {
+            return ides(month) - 8
+        }
+
+        export function toFixed(year: number, month: number, event: RomanEvent, count: number, leap: boolean): number {
+            let d = 1
+            if (event == RomanEvent.Nones) {
+                d = nones(month)
+            } else if (event == RomanEvent.Ides) {
+                d = ides(month)
+            }
+            let f = 1
+            if (Julian.isLeapYear(year) 
+                && month == 3 
+                && event == RomanEvent.Kalends 
+                && count >= 6 
+                && count <= 16) {
+                f = 0
+            }
+            let L = leap ? 1 : 0
+
+            return Julian.toFixed(year, month, d) - count + f + L
+        }
+
+        type RomanDate = [number, number, RomanEvent, number, boolean]
+
+        export function fromFixed(date: number): RomanDate {
+            const j = Julian.fromFixed(date)
+            const year = j[0]
+            const month = j[1]
+            const day = j[2]
+            if (day == 1) {
+                return [year, month, RomanEvent.Kalends, 1, false]
+            } else if (day <= nones(month)) {
+                return [year, month, RomanEvent.Nones, nones(month) - day + 1, false]
+            } else if (day <= ides(month)) {
+                return [year, month, RomanEvent.Ides, ides(month) - day + 1, false]
+            }
+            else if (month != 2 || !Julian.isLeapYear(year)) {
+                const month2 = _amod(month + 1, 12)
+                let year2 = 1
+                if (month2 != 1) {
+                    year2 = year
+                } else if (month2 == 1 && year != -1) {
+                    year2 = year + 1
+                }
+                const kalends1 = toFixed(year2, month2, RomanEvent.Kalends, 1, false)
+                return [year2, month2, RomanEvent.Kalends, kalends1 - date + 1, false]
+            } else if (day < 25) {
+                return [year, 3, RomanEvent.Kalends, 30 - day, false]
+            }
+            return [year, 3, RomanEvent.Kalends, 31 - day, day == 25]
+        }
+
+    }
+
     // ---------------- EASTER (Gregorian and Orthodox) -------------------//
     export namespace Easter {
         /**

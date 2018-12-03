@@ -79,6 +79,10 @@ describe('test dates1.csv for: JD, MJD, Weekday and calendars: Egyptian, Gregori
                 .toEqual(numericArray(record,["ArmenianYear","ArmenianMonth","ArmenianDay"]));
             expect(d.convertTo(CalendarType.ISO))
                 .toEqual(numericArray(record,["ISOYear","ISOMonth","ISODay"]));
+            const roman = d.convertTo(CalendarType.Roman)
+            expect(roman.slice(0,4))
+                .toEqual(numericArray(record, ["RomanYear", "RomanMonth", "RomanEvent", "RomanCount"], false));
+            expect(roman[4] == 1 ? "t" : "f").toBe(record.RomanLeap)
         })
     })
 })

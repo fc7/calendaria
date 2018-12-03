@@ -3,6 +3,7 @@ import {Calendars, Weekday} from "./Calendars"
 export enum CalendarType {
     Gregorian,
     Julian,
+    Roman,
     Egyptian,
     Armenian,
     Coptic,
@@ -103,6 +104,9 @@ export class CalendarDate {
                 return Calendars.ObservationalIslamic.fromFixed(this.rd)
             case CalendarType.Julian:
                 return Calendars.Julian.fromFixed(this.rd)
+            case CalendarType.Roman:
+                const numerify = (x: any): number => {return typeof x == 'boolean' ? (x ? 1 : 0) : x }
+                return Calendars.Roman.fromFixed(this.rd).map(numerify)
             case CalendarType.Persian:
                 return Calendars.Persian.fromFixed(this.rd)
             case CalendarType.French:
