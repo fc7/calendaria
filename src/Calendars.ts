@@ -149,14 +149,15 @@ export namespace Calendars {
         let hour = Math.floor(elapsedHours)
         let min = Math.floor(elapsedMinutes - hour * 60)
         let sec = elapsedSeconds - min * 60 - hour * 60 * 60
-        // fix rounding errors
-        if (Math.floor(sec * 10E6) + 1 === 600000000) {
+        // fix rounding errors ... we only need millisecond precision
+        sec = Math.round(sec*1000)/1000
+        if (Math.floor(sec) == 60) {
             sec = 0
             min += 1
-            if (min === 60) {
+            if (min == 60) {
                 min = 0
                 hour += 1
-                if (hour === 24) {
+                if (hour == 24) {
                     hour = 0
                     rday += 1
                 }
