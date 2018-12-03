@@ -222,8 +222,34 @@ export class DateBuilder {
     public ss: number = 0
     public z: number = 0
 
-    constructor(type: CalendarType) {
+    constructor(type: CalendarType, ...date: number[]) {
         this.t = type
+        const len = date.length
+        if (len>0) {
+                this.y = date[0]
+            if (len>1) {
+                if (type == CalendarType.ISO) {
+                    this.w = date[1]
+                } else {
+                    this.m = date[1]
+                }
+            }
+            if (len>2) {
+                this.d = date[2]
+            }
+            if (len>3) {
+                this.hh = date[3]
+            }
+            if (len>4) {
+                this.mm = date[4]
+            }
+            if (len>5) {
+                this.ss = date[5]
+            }
+            if (len>6) {
+                this.z = date[6]
+            }
+        }
     }
 
     public year(y: number): DateBuilder {
