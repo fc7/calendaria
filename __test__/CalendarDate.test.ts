@@ -14,13 +14,9 @@ function fixture(name: string): Array<any> {
 // function numericArray(record: any, y: string, m: string, d: string): number[] {
 //     return [parseInt(record[y]),parseInt(record[m]),parseInt(record[d]),0,0,0]
 // }
-function numericArray(record: any, columns: string[], zeroPadding?: boolean): number[] {
-    let padding = true
-    if (zeroPadding !== undefined) {
-        padding = zeroPadding
-    }
+function numericArray(record: any, columns: string[], zeroPadding = true): number[] {
     const arr = columns.map( x => parseInt(record[x]))
-    return (padding ? arr.concat([0,0,0]) : arr);
+    return (zeroPadding ? arr.concat([0,0,0]) : arr);
 }
 
 describe('simple tests', () => {
@@ -58,7 +54,7 @@ describe('simple tests', () => {
     })
 })
 
-describe('test dates1.csv for calendars: JD, Egyptian, Gregorian, Coptic, Julian, Armenian', () => {
+describe('test dates1.csv for: JD, MJD, Weekday and calendars: Egyptian, Gregorian, ISO, Coptic, Julian, Roman, Armenian', () => {
     const data1 = fixture('dates1.csv')
     //expect(data1.length).toBeGreaterThan(0);
     data1.forEach((record) => {
@@ -67,6 +63,10 @@ describe('test dates1.csv for calendars: JD, Egyptian, Gregorian, Coptic, Julian
             let d = CalendarDate.fromRD(rd);
             expect(d.toJulianDayNumber().toString())
                 .toBe(record["JD"]);
+            expect(Calendars.MJD.fromFixed(rd).toString())
+                .toBe(record["MJD"]);
+            expect(d.weekday())
+                .toBe(Weekday[record["Weekday"]]);
             expect(d.convertTo(CalendarType.Egyptian))
                 .toEqual(numericArray(record,["EgyptianYear","EgyptianMonth","EgyptianDay"]));
             expect(d.convertTo(CalendarType.Gregorian))
@@ -77,6 +77,8 @@ describe('test dates1.csv for calendars: JD, Egyptian, Gregorian, Coptic, Julian
                 .toEqual(numericArray(record,["JulianYear","JulianMonth","JulianDay"]));
             expect(d.convertTo(CalendarType.Armenian))
                 .toEqual(numericArray(record,["ArmenianYear","ArmenianMonth","ArmenianDay"]));
+            expect(d.convertTo(CalendarType.ISO))
+                .toEqual(numericArray(record,["ISOYear","ISOMonth","ISODay"]));
         })
     })
 })
