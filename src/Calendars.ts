@@ -101,7 +101,7 @@ export namespace Calendars {
     }
 
     export function getWeekday(date: number): Weekday {
-        return Math.floor(date) % 7
+        return _mod(Math.floor(date), 7)
     }
 
     // ---------------- JAVASCRIPT DATES -------------------//
