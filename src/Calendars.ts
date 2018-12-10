@@ -29,7 +29,14 @@ import * as globe from 'astronomia/lib/globe'
 const π = Math.PI
 const D2R = π / 180 // to convert degrees to radians
 
-interface Locale {
+/**
+ * Representation of a locality on earth:
+ * - latitude (in °)
+ * - longitude (in °)
+ * - elevation (in m)
+ * - zone (time zone, denoted by a number counted westwards, between -12 and 14)
+ */
+interface Locality {
     latitude: number
     longitude: number
     elevation?: number
@@ -725,27 +732,27 @@ export namespace Calendars {
 
     // TIME FUNCTIONS
     export namespace Time {
-        export function universalFromLocal(t: number, locale: Locale): number {
+        export function universalFromLocal(t: number, locale: Locality): number {
             return t - locale.longitude / 360
         }
 
-        export function localFromUniversal(t: number, locale: Locale): number {
+        export function localFromUniversal(t: number, locale: Locality): number {
             return t + locale.longitude / 360
         }
 
-        export function standardFromUniversal(t: number, locale: Locale): number {
+        export function standardFromUniversal(t: number, locale: Locality): number {
             return t + locale.zone / 24
         }
 
-        export function universalFromStandard(t: number, locale: Locale): number {
+        export function universalFromStandard(t: number, locale: Locality): number {
             return t - locale.zone / 24
         }
 
-        export function standardFromLocal(t: number, locale: Locale): number {
+        export function standardFromLocal(t: number, locale: Locality): number {
             return standardFromUniversal(universalFromLocal(t, locale), locale)
         }
 
-        export function localFromStandard(t: number, locale: Locale): number {
+        export function localFromStandard(t: number, locale: Locality): number {
             return localFromUniversal(universalFromStandard(t, locale), locale)
         }
 
@@ -767,11 +774,11 @@ export namespace Calendars {
             return t - eqtime.e(JD.fromFixed(t), EARTH)/(2*π)
         }
 
-        export function midnight(date: number, locale: Locale) {
+        export function midnight(date: number, locale: Locality) {
             return standardFromLocal(localFromApparent(Math.floor(date)), locale)
         }
 
-        export function midday(date: number, locale: Locale) {
+        export function midday(date: number, locale: Locality) {
             return standardFromLocal(localFromApparent(Math.floor(date) + 0.5), locale)
         }
     }
@@ -796,7 +803,7 @@ export namespace Calendars {
         return autumn
     }
 
-    export function momentFromDepression(approx: number, locale: Locale, angle: number): number {
+    export function momentFromDepression(approx: number, locale: Locality, angle: number): number {
         const t = Time.universalFromLocal(approx, locale)
         const δ = solar.apparentEquatorial(JD.fromFixed(t)).dec // in radians
         const morning = _mod(approx, 1) < 0.5 ? -1 : 1
@@ -809,7 +816,7 @@ export namespace Calendars {
             + morning * (_mod(0.5 + Math.asin(sineOffset) / (2 * π), 1) - 0.25))
     }
 
-    export function dawn(date: number, locale: Locale, angle: number): number {
+    export function dawn(date: number, locale: Locality, angle: number): number {
         const approx = momentFromDepression(date + 0.25, locale, angle)
         const x = approx == null ? date : approx
         const result = momentFromDepression(x, locale, angle)
@@ -819,7 +826,7 @@ export namespace Calendars {
         return Time.standardFromLocal(result, locale)
     }
 
-    export function dusk(date: number, locale: Locale, angle: number): number {
+    export function dusk(date: number, locale: Locality, angle: number): number {
         const approx = momentFromDepression(date + 0.75, locale, angle)
         const x = approx == null ? date + 0.99 : approx
         const result = momentFromDepression(x, locale, angle)
@@ -843,14 +850,14 @@ export namespace Calendars {
             return 5 / 6 + dip
         }
 
-        export function sunrise(date: number, locale: Locale): number {
+        export function sunrise(date: number, locale: Locality): number {
             return dawn(date, locale, _angle(locale.elevation))
         }
-        export function sunset(date: number, locale: Locale): number {
+        export function sunset(date: number, locale: Locality): number {
             return dusk(date, locale, _angle(locale.elevation))
         }
 
-        export function isCrescentVisible(date: number, locale: Locale): boolean {
+        export function isCrescentVisible(date: number, locale: Locality): boolean {
             // method from meeus: ... should be adapted to 4.5° instead of 6°
             /*
             let _date = new julian.Calendar().fromJD(JD.fromFixed(date-1))
@@ -879,7 +886,7 @@ export namespace Calendars {
             return crit
         }
 
-        export function phasisOnOrBefore(date: number, locale: Locale): number {
+        export function phasisOnOrBefore(date: number, locale: Locality): number {
             // const t = Time.dynamicalFromUniversal(Time.universalFromStandard(date + 1, locale))
             const jde = JD.fromFixed(date + 1)
             const lunarPos = moonposition.position(jde)
@@ -934,14 +941,14 @@ export namespace Calendars {
     }
     export namespace ObservationalIslamic {
 
-        const CAIRO: Locale = {
+        const CAIRO: Locality = {
             latitude : 30.1,
             longitude: 31.3,
             elevation: 200,
             zone : 2,
         }
 
-        export function toFixed(year: number, month:number, day:number, locale?: Locale): number {
+        export function toFixed(year: number, month:number, day:number, locale?: Locality): number {
             if (!locale) {
                 locale = CAIRO
             }
@@ -949,7 +956,7 @@ export namespace Calendars {
             return Astronomy.phasisOnOrBefore(midMonth, locale) + day - 1
         }
 
-        export function fromFixed(date: number, locale?: Locale): DateArray {
+        export function fromFixed(date: number, locale?: Locality): DateArray {
             if (!locale) {
                 locale = CAIRO
             }
@@ -970,7 +977,7 @@ export namespace Calendars {
 
         export const EPOCH = 226896 // = Julian.toFixed(622,3,19)
 
-        export const TEHRAN: Locale = {
+        export const TEHRAN: Locality = {
             latitude: 35.68,
             longitude: 51.42,
             elevation: 1100,
@@ -1019,9 +1026,9 @@ export namespace Calendars {
     // ---------------- FRENCH REVOLUTIONARY CALENDAR -------------------//
     export namespace French {
         export const EPOCH = 654415 // Gregorian.toFixed(1792,9,22)
-        export const PARIS: Locale = {
+        export const PARIS: Locality = {
             latitude: 48 + 50 / 60 + 11 / 3600,
-            longitude: 2 + 20 / 60 + 15 / 3600,
+            longitude: 2 + 20 / 60 + 14 / 3600,
             elevation: 27,
             zone: 1,
         }
