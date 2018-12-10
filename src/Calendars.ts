@@ -59,8 +59,8 @@ export namespace Calendars {
 
     /**
      * Adapted Modulo function to account for negative a or b
-     * @param {*} a
-     * @param {*} b
+     * @param {number} a
+     * @param {number} b
      * @returns a modulo b
      */
     function _mod(a: number, b: number): number {
@@ -69,8 +69,8 @@ export namespace Calendars {
 
     /**
      * Adjusted remainder function
-     * @param {*} a
-     * @param {*} b
+     * @param {number} a
+     * @param {number} b
      * @returns a modulo b
      */
     function _amod(a: number, b: number): number {
@@ -83,9 +83,9 @@ export namespace Calendars {
 
     /**
      * Returns the date of the weekday k occurring on or before the given date
-     * @param {*} date
-     * @param {*} k weekday number (starting with 0 = Sunday)
-     * @returns an RD date
+     * @param {number} date
+     * @param {Weekday} k weekday number (starting with 0 = Sunday)
+     * @returns {number} an RD date
      */
     export function weekdayOnOrBefore(date: number, k: Weekday): number {
         return date - _mod((date - k), 7)
@@ -94,12 +94,19 @@ export namespace Calendars {
      * Returns the date of the weekday k occurring after the given date
      * @param {number} date
      * @param {Weekday} k weekday number (starting with 0 = Sunday)
-     * @returns an RD date
+     * @returns {number} an RD date
      */
     export function weekdayAfter(date: number, k: Weekday): number {
         return weekdayOnOrBefore(date + 7, k)
     }
 
+    /**
+     * Returns the date occurring on the nth occurrence of weekday k after date (or before if n is negative)
+     * @param n 
+     * @param k 
+     * @param date 
+     * @returns another date
+     */
     export function nthWeekday(n: number, k: Weekday, date: number): number {
         if (n>0) {
             return 7*n + weekdayOnOrBefore(date-1, k)
@@ -107,6 +114,11 @@ export namespace Calendars {
         return 7*n + weekdayAfter(date, k)
     }
 
+    /**
+     * Returns the Weekday of the given date
+     * @param date 
+     * @returns the Weekday
+     */
     export function getWeekday(date: number): Weekday {
         return _mod(Math.floor(date), 7)
     }
@@ -120,7 +132,7 @@ export namespace Calendars {
     /**
      * Converts a native JavaScript date to an RD date
      * @param {Date} jsDate
-     * @returns an RD date
+     * @returns {number} an RD date
      */
     export function toFixed(jsDate: Date): number {
         return UNIX_DATE_EPOCH + jsDate.getTime() / MILLISECONDS_PER_DAY
@@ -128,8 +140,8 @@ export namespace Calendars {
 
     /**
      * Converts an RD to a JavaScript Date
-     * @param {*} date
-     * @returns a Date
+     * @param {number} date
+     * @returns {Date} a JavaScript Date
      */
     export function fromFixed(date: number): Date {
         const ms = (date - UNIX_DATE_EPOCH) * MILLISECONDS_PER_DAY
@@ -138,10 +150,10 @@ export namespace Calendars {
 
     /**
      * Helper function to represent a year, month and day (potentially with fractional part)
-     * as an array [year,month,day,hour,min,sec]
-     * @param {*} year
-     * @param {*} month
-     * @param {*} day
+     * as an array [year,month,day,hour,min,sec] (the seconds potentially with fractional part)
+     * @param {number} year
+     * @param {number} month
+     * @param {number} day
      */
     export function toArray(year: number, month: number, day: number): DateArray {
         // console.log("formatting y-m-d as array: "+ year +"-"+ month +"-"+ day)
@@ -181,15 +193,15 @@ export namespace Calendars {
         export const EPOCH = -1721424.5
 
         /**
-         * Returns the Julian Day Number for the given RD
-         * @param {*} date
+         * Returns the Julian Day (JD) for the given RD
+         * @param {number} date
          */
         export function fromFixed(date: number): number {
             return date - EPOCH
         }
         /**
-         * Returns the RD for the given Julian Day
-         * @param {*} jd
+         * Returns the RD for the given JD
+         * @param {number} jd
          */
         export function toFixed(jd: number): number {
             return jd + EPOCH
@@ -201,14 +213,27 @@ export namespace Calendars {
 
         export const EPOCH = 678576 // = JD.EPOCH - MODIFIED_JULIAN_ADJUSTMENT -> 1858-11-17
 
+        /**
+         * Returns the Modified Julian Day (MJD) for the given JD
+         * @param {number} jd
+         * 
+         */
         export function fromJD(jd: number): number {
             return jd - MODIFIED_JULIAN_ADJUSTMENT
         }
 
+        /**
+         * Returns the MJD for the given RD
+         * @param {number} date
+         */
         export function fromFixed(date: number): number {
             return date - EPOCH
         }
 
+        /**
+         * Returns the RD for the given MJD
+         * @param {number} jd
+         */
         export function toFixed(mjd: number): number {
             return mjd + EPOCH
         }
@@ -222,9 +247,9 @@ export namespace Calendars {
 
         /**
          * Returns the RD for the given Egyptian date
-         * @param {*} year
-         * @param {*} month
-         * @param {*} day
+         * @param {number} year
+         * @param {number} month
+         * @param {number} day
          */
         export function toFixed(year: number, month: number, day: number): number {
             return Egyptian.EPOCH + 365 * (year - 1) + 30 * (month - 1) + day - 1
@@ -232,7 +257,7 @@ export namespace Calendars {
 
         /**
          * Returns the Egyptian date for the given RD
-         * @param {*} date
+         * @param {number} date
          */
         export function fromFixed(date: number): DateArray {
             const days = date - Egyptian.EPOCH
@@ -249,16 +274,16 @@ export namespace Calendars {
 
         /**
          * Returns the RD for the given Armenian date
-         * @param {*} year
-         * @param {*} month
-         * @param {*} day
+         * @param {number} year
+         * @param {number} month
+         * @param {number} day
          */
         export function toFixed(year: number, month: number, day: number): number {
             return EPOCH + Egyptian.toFixed(year, month, day) - Egyptian.EPOCH
         }
         /**
          * Returns the Armenian date for the given RD
-         * @param {*} date
+         * @param {number} date
          */
         export function fromFixed(date: number): DateArray {
             return Egyptian.fromFixed(date + Egyptian.EPOCH - EPOCH)
@@ -271,16 +296,16 @@ export namespace Calendars {
 
         /**
          * Whether the given Gregorian year is a leap year
-         * @param {*} year
+         * @param {number} year
          */
         export function isLeapYear(year: number): boolean {
             return (_mod(year, 400) === 0) || (_mod(year, 4) === 0 && _mod(year, 100) !== 0)
         }
         /**
          * Returns the "Rate Die" (RD), namely the day count since 1 January 1 Gregorian, for the given Gregorian date
-         * @param {*} year
-         * @param {*} month
-         * @param {*} day
+         * @param {number} year
+         * @param {number} month
+         * @param {number} day
          */
         export function toFixed(year: number, month: number, day: number): number {
             let correction = 0
@@ -294,7 +319,8 @@ export namespace Calendars {
 
         /**
          * Returns the Gregorian year for the given RD
-         * @param {*} date
+         * @param {number} date
+         * @returns {number} Gregorian year
          */
         export function yearFromFixed(date: number): number {
             const d0 = date - 1
@@ -317,7 +343,7 @@ export namespace Calendars {
 
         /**
          * Returns the Gregorian date as an array for the given RD
-         * @param {*} date
+         * @param {number} date
          */
         export function fromFixed(date: number): DateArray {
             const year = yearFromFixed(date)
@@ -342,7 +368,7 @@ export namespace Calendars {
 
         /**
          * Whether the given Julian year is a leap year
-         * @param {*} year
+         * @param {number} year
          */
         export function isLeapYear(year: number): boolean {
             const f = year > 0 ? 0 : 3
@@ -353,9 +379,9 @@ export namespace Calendars {
 
         /**
          * Returns the RD for the given Julian date
-         * @param {*} year
-         * @param {*} month
-         * @param {*} day
+         * @param {number} year
+         * @param {number} month
+         * @param {number} day
          */
         export function toFixed(year: number, month: number, day: number): number {
             const y = year < 0 ? year : year - 1 // "y" here corr. to "y-1" in R&D
@@ -370,7 +396,7 @@ export namespace Calendars {
 
         /**
          * Returns the Julian date as an array for the given RD
-         * @param {*} date
+         * @param {number} date
          */
         export function fromFixed(date: number): DateArray {
             const approx = Math.floor((4 * (date - EPOCH) + 1464) / 1461)
@@ -460,7 +486,7 @@ export namespace Calendars {
     export namespace Easter {
         /**
          * Returns the RD of the Gregorian Easter for the given Gregorian year
-         * @param {*} year
+         * @param {number} year
          */
         export function Gregorian(year: number): number {
             const c = Math.floor(year / 100) + 1
@@ -475,7 +501,7 @@ export namespace Calendars {
         }
         /**
          * Returns the RD of the Orthodox Easter for the given Gregorian year
-         * @param {*} year
+         * @param {number} year
          */
         export function Orthodox(year: number): number {
             const paschalMoon = 354 * year + 30 * Math.floor((7 * year + 8) / 19)
@@ -492,7 +518,7 @@ export namespace Calendars {
         export const EPOCH = 103605 // = Julian.toFixed(284,8,29)
         /**
          * Whether the given Coptic year is a leap year
-         * @param {*} year
+         * @param {number} year
          */
         export function isLeapYear(year: number): boolean {
             return _mod(year, 4) === 3
@@ -500,9 +526,9 @@ export namespace Calendars {
 
         /**
          * Returns the RD for the given Coptic date
-         * @param {*} year
-         * @param {*} month
-         * @param {*} day
+         * @param {number} year
+         * @param {number} month
+         * @param {number} day
          */
         export function toFixed(year: number, month: number, day: number): number {
             return EPOCH - 1 + 365 * (year - 1) + Math.floor(year / 4) + 30 * (month - 1) + day
@@ -510,7 +536,7 @@ export namespace Calendars {
 
         /**
          * Returns the Coptic date as an array for the given RD
-         * @param {*} date
+         * @param {number} date
          */
         export function fromFixed(date: number): DateArray {
             const year = Math.floor((4 * (date - EPOCH) + 1463) / 1461)
@@ -525,16 +551,16 @@ export namespace Calendars {
 
         /**
          * Returns the RD for the given Ethiopic date
-         * @param {*} year
-         * @param {*} month
-         * @param {*} day
+         * @param {number} year
+         * @param {number} month
+         * @param {number} day
          */
         export function toFixed(year: number, month: number, day: number): number {
             return EPOCH + Coptic.toFixed(year, month, day) - Coptic.EPOCH
         }
         /**
          * Returns the Ethiopic date as an array for the given RD
-         * @param {*} date
+         * @param {number} date
          */
         export function fromFixed(date: number): DateArray {
             return Coptic.fromFixed(date + Coptic.EPOCH - EPOCH)
@@ -566,7 +592,7 @@ export namespace Calendars {
 
         /**
          * Whether the given Islamic year is a leap year
-         * @param {*} year
+         * @param {number} year
          */
         export function isLeapYear(year: number): boolean {
             return _mod(14 + 11 * year, 30) < 11
@@ -574,9 +600,9 @@ export namespace Calendars {
 
         /**
          * Returns the RD for the given Islamic date
-         * @param {*} year
-         * @param {*} month
-         * @param {*} day
+         * @param {number} year
+         * @param {number} month
+         * @param {number} day
          */
         export function toFixed(year: number, month: number, day: number): number {
             return day + 29 * (month - 1) + Math.floor((6 * month - 1) / 11) +
@@ -585,7 +611,7 @@ export namespace Calendars {
 
         /**
          * Returns the Islamic date as an array for the given RD
-         * @param {*} date
+         * @param {number} date
          */
         export function fromFixed(date: number): DateArray {
             const year = Math.floor((30 * (date - EPOCH) + 10646) / 10631)
@@ -605,7 +631,7 @@ export namespace Calendars {
 
         /**
          * Whether the given Hebrew year is a leap year
-         * @param {*} year
+         * @param {number} year
          */
         export function isLeapYear(year: number): boolean {
             return _mod(7 * year + 1, 19) < 7
@@ -678,9 +704,9 @@ export namespace Calendars {
 
         /**
          * Returns the RD for the given Hebrew date
-         * @param {*} year
-         * @param {*} month
-         * @param {*} day
+         * @param {number} year
+         * @param {number} month
+         * @param {number} day
          */
         export function toFixed(year: number, month: number, day: number): number {
             const lastMonth = isLeapYear(year) ? 13 : 12
@@ -702,7 +728,7 @@ export namespace Calendars {
 
         /**
          * Returns the Hebrew date as an array for the given RD
-         * @param {*} date
+         * @param {number} date
          */
         export function fromFixed(date: number): DateArray {
             const approx = Math.floor((date - EPOCH) * 98496 / 35975351) + 1
