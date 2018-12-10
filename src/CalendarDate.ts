@@ -48,10 +48,6 @@ export class CalendarDate {
         }
     }
 
-    public static fromRD(fixed: number): CalendarDate {
-        return new CalendarDate(Calendars.fromFixed(fixed))
-    }
-
     public toRD(): number {
         return this.rd
     }

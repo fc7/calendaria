@@ -64,7 +64,7 @@ describe('test dates1.csv for: JD, MJD, Weekday and calendars: Egyptian, Gregori
     data1.forEach((record) => {
         let rd = parseInt(record["RD"])
         test(`test calendar conversions for RD date ${rd}`, () => {
-            let d = CalendarDate.fromRD(rd);
+            let d = new CalendarDate(rd);
             expect(d.toJulianDayNumber().toString())
                 .toBe(record["JD"]);
             expect(Calendars.MJD.fromFixed(rd).toString())
@@ -97,7 +97,7 @@ describe('test dates2.csv for calendars: Ethiopic, Islamic, Mayan', () => {
     data2.forEach( record => {
         let rd = parseInt(record["RD"])
         test(`test calendar conversions for RD date ${rd}`, () => {
-            let d = CalendarDate.fromRD(rd)
+            let d = new CalendarDate(rd)
             expect(d.convertTo(CalendarType.Ethiopic))
                 .toEqual(numericArray(record,["EthiopicYear","EthiopicMonth","EthiopicDay"]));
             expect(d.convertTo(CalendarType.Islamic))
@@ -123,7 +123,7 @@ describe('test dates3.csv for calendars: Hebrew + Persian + French', () => {
     data3.forEach( record => {
         let rd = parseInt(record["RD"])
         test(`test calendar conversions for RD date ${rd}`, () => {
-            let d = CalendarDate.fromRD(rd)
+            let d = new CalendarDate(rd)
             expect(d.convertTo(CalendarType.Hebrew))
                 .toEqual(numericArray(record,["HebrewYear","HebrewMonth","HebrewDay"]));
             expect(d.convertTo(CalendarType.Persian))
@@ -143,7 +143,7 @@ describe('test dates4.csv for calendars: Chinese + Old Hindu + Hindu', () => {
     data4.forEach( record => {
         let rd = parseInt(record["RD"])
         test(`test calendar conversions for RD date ${rd}`, () => {
-            let d = CalendarDate.fromRD(rd)
+            let d = new CalendarDate(rd)
             // expect(d.convertTo(CalendarType.Chinese))
             //     .toEqual(numericArray(record,["ChineseCycle","ChineseYear","ChineseMonth","ChineseDay","ChineseNameOfDayStem","ChineseNameOfDayBranch","ChineseNextZhongqi"]));
             // let expectedLeap = record["ChineseMonthLeap"] == "t" ? true : false;
