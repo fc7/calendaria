@@ -2,7 +2,7 @@
   "name": "calendaria",
   "version": "1.0.0",
   "description": "Calendrical conversion library",
-  "main": "dist/Calendars.js",
+  "main": "dist/src/index.js",
   "scripts": {
     "compile": "tsc",
     "test": "jest"
