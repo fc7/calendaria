@@ -1,4 +1,5 @@
-import {Calendars, Weekday} from "./Calendars"
+import * as Calendars from "./Calendars"
+import {Weekday} from "./Weekday"
 
 export enum CalendarType {
     Gregorian,

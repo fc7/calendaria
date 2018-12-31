@@ -1,23 +1,7 @@
 import {CalendarDate, CalendarType, DateBuilder} from '../src/CalendarDate';
-import {Calendars, Weekday} from "../src/Calendars"
-import * as csvparse from 'csv-parse/lib/sync';
-import * as fs  from 'fs';
-import * as path from 'path';
-
-function fixture(name: string): Array<any> {
-    let input = fs.readFileSync(path.join(__dirname, 'test_data', name), {encoding: "utf8"});
-    return csvparse(input, {
-        columns: true
-      })
-}
-
-// function numericArray(record: any, y: string, m: string, d: string): number[] {
-//     return [parseInt(record[y]),parseInt(record[m]),parseInt(record[d]),0,0,0]
-// }
-function numericArray(record: any, columns: string[], zeroPadding = true): number[] {
-    const arr = columns.map( x => parseInt(record[x]))
-    return (zeroPadding ? arr.concat([0,0,0]) : arr);
-}
+import * as Calendars from "../src/Calendars"
+import {Weekday} from '../src/Weekday'
+import {fixture, numericArray} from './fixture'
 
 describe('simple tests', () => {
     test('test empty constructor', () => {

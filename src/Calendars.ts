@@ -10,6 +10,7 @@
  * @author François Charette, 2018
  * @license MIT
  */
+import {Weekday} from './Weekday'
 import * as astro from 'astronomia/lib/base'
 import * as deltat from 'astronomia/lib/deltat'
 import * as eqtime from 'astronomia/lib/eqtime'
@@ -43,15 +44,6 @@ interface Locality {
     zone: number
 }
 
-export enum Weekday {
-    Sunday = 0,
-    Monday,
-    Tuesday,
-    Wednesday,
-    Thursday,
-    Friday,
-    Saturday
-}
 
 export namespace Calendars {
 
