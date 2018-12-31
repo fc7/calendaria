@@ -1116,7 +1116,7 @@ export namespace Mayan {
             return EPOCH + baktun * 144000 + katun * 7200 + tun * 360 + uinal * 20 + kin
         }
 
-            export function fromFixed(date: number): [number, number, number, number, number] {
+        export function fromFixed(date: number): number[] {
             const longCount = date - EPOCH
             const baktun = Math.floor(longCount / 144000)
             const dayOfBaktun = _mod(longCount, 144000)
@@ -1126,7 +1126,8 @@ export namespace Mayan {
             const dayOfTun = _mod(dayOfKatun, 360)
             const uinal = Math.floor(dayOfTun / 20)
             const kin = _mod(dayOfTun, 20)
-                return [baktun, katun, tun, uinal, kin]
+            const rest = toArray(0,0,kin).splice(2)
+            return [baktun, katun, tun, uinal].concat(rest)
         }
     }
     export namespace Haab {
@@ -1137,11 +1138,12 @@ export namespace Mayan {
 
         export const EPOCH = Mayan.LongCount.EPOCH - ordinal(18, 8)
 
-            export function fromFixed(date: number): [number, number] {
+        export function fromFixed(date: number): number[] {
             const count = _mod(date - EPOCH, 365)
             const day = _mod(count, 20)
             const month = Math.floor(count / 20) + 1
-                return [month, day]
+            const rest = toArray(0,0,day).splice(2)
+            return [month].concat(rest)
         }
 
         export function onOrBefore(haabMonth: number, haabDay: number, date: number) {
@@ -1156,11 +1158,12 @@ export namespace Mayan {
 
         export const EPOCH = Mayan.LongCount.EPOCH - ordinal(4, 20)
 
-            export function fromFixed(date: number): [number, number] {
+        export function fromFixed(date: number): number[] {
             const count = date - EPOCH + 1
             const number = _amod(count, 13)
             const name = _amod(count, 20)
-                return [number, name]
+            const rest = toArray(0,0,name).splice(2)
+            return [number].concat(rest)
         }
 
         export function onOrBefore(tzolkinNumber: number, tzolkinName: number, date: number): number {
