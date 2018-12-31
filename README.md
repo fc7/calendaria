@@ -2,9 +2,6 @@
 
 > Calendrical conversion library
 
-[![NPM version](https://badge.fury.io/js/calendaria.svg)](https://www.npmjs.com/package/calendaria/)
-[![Build Status](https://secure.travis-ci.org/fc7/calendaria.svg?branch=master)](https://travis-ci.org/fc7/calendaria)
-
 This library is a straightfoward implementation and adaptation to TypeScript of the calendar computations featured in
 [Edward M. Reingold and Nachum Dershowitz, _Calendrical Calculations, The Millenium Edition_, Cambridge University Press, 2001](http://calendarists.com/), also taking into account the [errata published online](http://www.cs.tau.ac.il/~nachum/calendar-book/second-edition/errata.pdf). NB: a [fourth edition](https://www.cambridge.org/fr/academic/subjects/computer-science/computing-general-interest/calendrical-calculations-ultimate-edition-4th-edition) was published in April 2018.
 
